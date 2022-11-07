@@ -28,8 +28,8 @@ class Scene {
 
         // Set the eye point, look-at point, and up vector.
         this.viewProjMatrix = new Matrix4();
-        this.viewProjMatrix.setPerspective(30, canvas.width/canvas.height, 1, 100);
-        this.viewProjMatrix.lookAt(2.06, 2.6, 20, 0, 0, -2, 0, 1, 0);
+        this.viewProjMatrix.setPerspective(30, canvas.width/canvas.height, 1, 1000);
+        this.viewProjMatrix.lookAt(80, 60, 80, -4, -3, -4, 0, 1, 0);
 
         // Init object list
         this.objects = [];
