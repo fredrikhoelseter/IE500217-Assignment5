@@ -1,0 +1,136 @@
+<!doctype html>
+
+<html>
+<head>
+    <title>Scene builder</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div class="container">
+    <header>
+        <h1>Assignment 4</h1>
+    </header>
+    <nav>
+        <div>
+            <div>
+                <label for="translation-x">Position:</label>
+                <input type="text" id="translation-x" value="0" size="5px">
+                <input type="text" id="translation-y" value="0" size="5px">
+                <input type="text" id="translation-z" value="0" size="5px">
+            </div>
+            <div>
+                <label for="scale-x">Scale:</label>
+                <input type="text" id="scale-x" value="0.3" size="5px">
+                <input type="text" id="scale-y" value="0.3" size="5px">
+                <input type="text" id="scale-z" value="0.3" size="5px">
+            </div>
+            <div>
+                <label for="rotation-z">Rotation along z-axis (in deg):</label>
+                <input type="text" id="rotation-z" value="0.0" size="5px">
+            </div>
+            <div>
+                <label for="shape">Shape:</label>
+                <select name="shape" id="shape">
+                    <option value="cube">Cube</option>
+                    <option value="square-pyramid">Square Pyramid</option>
+                    <option value="cylinder">Cylinder</option>
+                    <option value="cone">Cone</option>
+                    <option value="disk">Disk</option>
+                    <option value="plane">Plane</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <button type="button" id="add-button">ADD</button>
+            <button type="button" id="remove-button">REMOVE</button>
+        </div>
+        <div id="color-select">
+            <label for="color">Choose a color:</label>
+            <select id="color">
+                <option value="red">Red</option>
+                <option value="orange">Orange</option>
+                <option value="yellow">Yellow</option>
+                <option value="green">Green</option>
+                <option value="blue">Blue</option>
+                <option value="purple">Purple</option>
+                <option value="pink">Pink</option>
+            </select>
+            <button type="button" id="apply-color">APPLY COLOR</button>
+        </div>
+    </nav>
+    <main>
+        <canvas id="canvas" width="700" height="500">
+            Please use a browser that supports "canvas"
+        </canvas>
+
+        <h2>Controls</h2>
+
+        <h3>Moving</h3>
+        <ul>
+            <li>D - Move positively along the X axis</li>
+            <li>A - Move negatively along the X axis</li>
+            <li>W - Move positively along the Y axis</li>
+            <li>S - Move negatively along the Y axis</li>
+            <li>Q - Move positively along the Z axis</li>
+            <li>E - Move negatively along the Z axis</li>
+        </ul>
+
+        <h3>Rotating</h3>
+        <ul>
+            <li>H - Rotate positively along the X axis</li>
+            <li>F - Rotate negatively along the X axis</li>
+            <li>T - Rotate positively along the Y axis</li>
+            <li>G - Rotate negatively along the Y axis</li>
+            <li>R - Rotate positively along the Z axis</li>
+            <li>Y - Rotate negatively along the Z axis</li>
+        </ul>
+
+        <h3>Scaling</h3>
+        <ul>
+            <li>L - Scale positively along the X axis</li>
+            <li>J - Scale negatively along the X axis</li>
+            <li>I - Scale positively along the Y axis</li>
+            <li>K - Scale negatively along the Y axis</li>
+            <li>U - Scale positively along the Z axis</li>
+            <li>O - Scale negatively along the Z axis</li>
+            <li>X - Increase scale uniformly         </li>
+            <li>Z - Decrease scale uniformly         </li>
+        </ul>
+
+        <h3>Clear all transforms</h3>
+        <ul>
+            <li>C - Reset all transforms on selected object</li>
+        </ul>
+    </main>
+    <aside>
+        <div>
+            <label for="objects">GameObjects</label>
+            <select id="objects" size="20"></select>
+        </div>
+        <p id="error"></p>
+    </aside>
+</div>
+
+<script src="lib/webgl-utils.js"></script>
+<script src="lib/webgl-debug.js"></script>
+<script src="lib/cuon-utils.js"></script>
+<script src="lib/cuon-matrix.js"></script>
+<script src="src/utils/input-handler.js"></script>
+<script src="src/utils/color-vector.js"></script>
+<script src="src/utils/enums.js"></script>
+<script src="src/shaders/vertex.js"></script>
+<script src="src/shaders/fragment.js"></script>
+<script src="src/objects/parents/geometry-parent.js"></script>
+<script src="src/objects/parents/cylinder-parent.js"></script>
+<script src="src/objects/cube.js"></script>
+<script src="src/objects/square-pyramid.js"></script>
+<script src="src/objects/cylinder.js"></script>
+<script src="src/objects/cone.js"></script>
+<script src="src/objects/disk.js"></script>
+<script src="src/objects/plane.js"></script>
+<script src="src/scene.js"></script>
+<script src="src/index.js"></script>
+</body>
+</html>
