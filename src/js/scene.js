@@ -3,6 +3,7 @@ import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.17/+esm';
 import { OrbitControls } from "./OrbitControls.js";
 import * as construction from "./construction.js"
 import * as light from "./lighting.js";
+import * as sun from "./sun.js";
 
 
 const scene = new THREE.Scene();
@@ -27,9 +28,16 @@ construction.createCityBlocks(scene);
 //Landmark for the city
 construction.buildLandMark(6,8,4, new THREE.MeshPhongMaterial({color: 0xFFD700}), scene);
 
+const curve = new THREE.EllipseCurve(
+    0,0,
+    -30, 25,
+    0, 2*Math.PI,
+);
+
 //Lighting
 light.ambientLighting(0xFFFFFF, 0.5, scene);
-light.directionalLighting(0xFFFFFF, 0.7, new THREE.Vector3(10, 15, -30), scene);
+//light.directionalLighting(0xFFFFFF, 0.7, new THREE.Vector3(10, 15, -30), scene);
+light.pointLighting(0xFFFFFF, 0.1, new THREE.Vector3(-30, 0, 0), scene);
 
 //Render the scene
 const renderer = new THREE.WebGLRenderer();
@@ -38,11 +46,32 @@ renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+const mySun = sun.sun();
+const sunLight = light.pointLighting();
+scene.add(sunLight);
+scene.add(mySun);
+function animateOrbit(){
+    const loopTime = 1;
+    const sunOrbitSpeed = 0.0001;
+    const time = sunOrbitSpeed * performance.now();
+    const t = (time % loopTime) / loopTime;
+
+    let p = curve.getPoint(t);
+    mySun.position.x = p.x;
+    mySun.position.y = p.y;
+    sunLight.position.x = p.x;
+    sunLight.position.y = p.y;
+
+
+    requestAnimationFrame(animateOrbit);
+    renderer.render(scene, camera);
+}
+
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 }
-
+animateOrbit();
 animate();
 
 /// GUI

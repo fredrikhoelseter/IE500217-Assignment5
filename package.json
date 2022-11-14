@@ -13,6 +13,8 @@
     "live-server": "^1.1.0"
   },
   "dependencies": {
-    "lil-gui": "^0.17.0"
+    "lil-gui": "^0.17.0",
+    "postprocessing": "^6.29.1",
+    "three": "^0.146.0"
   }
 }
