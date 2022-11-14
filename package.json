@@ -1,17 +1,18 @@
 {
-  "name": "scene-builder",
+  "name": "three",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "live-server"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "live-server": "^1.1.0"
   },
   "dependencies": {
-    "three": "^0.146.0"
+    "lil-gui": "^0.17.0"
   }
 }
