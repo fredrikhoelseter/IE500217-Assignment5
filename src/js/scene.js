@@ -72,10 +72,15 @@ function onMouseMove(event) {
 
 let selectedObject = null;
 
-function onClick(event) {
+/**
+ * Saves the first intersected object from the raycaster to selecteObject variable, 
+ * as long as the object is not of geometry type PlaneGeometry.
+ * If no objects other then PlaneGeometry intersect with the ray, sets the selected object to null.
+ */
+function onClick() {
     raycaster.setFromCamera(mouse, camera);
     const intersectObjects = raycaster.intersectObjects(scene.children);
-    if (intersectObjects.length > 0) {
+    if (intersectObjects.length > 0 && intersectObjects[0].object.geometry.type != 'PlaneGeometry') {
         selectedObject = intersectObjects[0].object;
     } else {
         selectedObject = null;
@@ -112,36 +117,43 @@ function hoverObject() {
 	// calculate objects intersecting the picking ray
 	const intersectObjects = raycaster.intersectObjects(scene.children);
     if (intersectObjects.length > 0) {
-        if (intersectObjects[0].object.geometry.type != 'PlaneGeometry') {
-            if (intersectObjects[0].object == selectedObject) {
-                intersectObjects[0].object.material.color.set(selectedColor);
-            } else {
-	            intersectObjects[0].object.material.color.set(hoverColor);
-            }
+        if (intersectObjects[0].object.geometry.type != 'PlaneGeometry' && intersectObjects[0].object != selectedObject) {
+	        intersectObjects[0].object.material.color.set(hoverColor);
         }
         //intersects[0].object.material.transparent = true;
         //intersects[0].object.material.opacity = 0.5;
     }
 }
 
+/**
+ * Adjusts the renderer size according to the size of the browser window.
+ */
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+// Event listeners.
 window.addEventListener('resize', onWindowResize);
 window.addEventListener('click', onClick);
 window.addEventListener('mousemove', onMouseMove);
 window.addEventListener("keydown", onDocumentKeyDown, false);
 
+/**
+ * Keyboard bindings.
+ * @param {*} event 
+ */
 function onDocumentKeyDown(event) {
     let keyCode = event.which;
-    
+    const moveStep = 0.25;
+    const rotationStep = Math.PI/32;
+    const scaleStep = 0.1;
     if (selectedObject == null) {
         console.log("No object selected");
     } else {
         switch (keyCode) {
+            /////////    DELETE SELECTED OBJECT    /////////
             // Backspace
             case 8:    
                 scene.remove(selectedObject);
@@ -150,6 +162,84 @@ function onDocumentKeyDown(event) {
             case 46:
                 scene.remove(selectedObject);
                 break;
+            /////////    DELETE SELECTED OBJECT    /////////
+
+        
+
+            /////////    MOVE SELECTED OBJECT    /////////
+            // A
+            case 65:
+                // Move selectedObject in positive x-direction.
+                selectedObject.position.x += moveStep
+                break;
+            // D
+            case 68:
+                // Move selectedObject in negative x-direction.
+                selectedObject.position.x -= moveStep
+                break;
+            // W
+            case 87:
+                // Move selectedObject in positive z-direction.
+                selectedObject.position.z += moveStep
+                break;
+            // S
+            case 83:
+                // Move selectedObject in negative z-direction.
+                selectedObject.position.z -= moveStep
+                break;
+            /////////    MOVE SELECTED OBJECT    /////////
+
+
+
+            /////////    ROTATE SELECTED OBJECT    /////////
+            // Q
+            case 81:
+                // Rotate selected object clockwise around y-axis.
+                selectedObject.rotation.y -= rotationStep;
+                break;
+            // E
+            case 69:
+                // Rotate selected object counter-clockwise around y-axis.
+                selectedObject.rotation.y += rotationStep;
+                break;
+            /////////    ROTATE SELECTED OBJECT    /////////
+
+
+
+            /////////    SCALE SELECTED OBJECT    /////////
+            // Z
+            case 90:
+                // Scale up x.
+                selectedObject.scale.x += scaleStep;
+                break;
+            // X
+            case 88:
+                // Scale down x.
+                selectedObject.scale.x -= scaleStep;
+                break;
+            // C
+            case 67:
+                // Scale up z.
+                selectedObject.scale.z += scaleStep;
+                break;
+            // V
+            case 86:
+                // Scale down z.
+                selectedObject.scale.z -= scaleStep;
+                break;
+            // R
+            case 82:
+                // Scale up y.
+                selectedObject.scale.y += scaleStep;
+                // TODO: Adjust y position so the object only scales "upwards"
+                break;
+            // F
+            case 70:
+                // Scale down y.
+                selectedObject.scale.y -= scaleStep;
+                // TODO: Adjust y position so the object only downscales "upwards"
+                break;
+            /////////    SCALE SELECTED OBJECT    /////////
 
             default:
                 return;
