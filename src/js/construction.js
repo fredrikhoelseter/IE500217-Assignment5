@@ -1,3 +1,5 @@
+import * as materials from './material.js';
+
 const hexColor = () => "#" + Math.floor(Math.random() * 0xffffff).toString(16).padEnd(6, '0');
 const CUBE_MAX_WIDTH = 2.5;
 const CUBE_MIN_WIDTH = 1.5;
@@ -14,7 +16,8 @@ function buildBlock(length, space, origin, scene) {
         let cubeLength = (Math.random() * (CUBE_MAX_LENGTH - CUBE_MIN_LENGTH)) + CUBE_MIN_LENGTH;
         let height = cubeHeight / 2;
         const cubeGeo = new THREE.BoxGeometry(cubeWidth, cubeHeight, cubeLength);
-        const cubeMaterial = new THREE.MeshPhongMaterial({color: hexColor()});
+        //const cubeMaterial = new THREE.MeshPhongMaterial({color: hexColor()});
+        const cubeMaterial = materials.randomMaterial();
         const cubeMesh = new THREE.Mesh(cubeGeo, cubeMaterial);
         cubeMesh.castShadow = true;
         cubeMesh.receiveShadow = true;
