@@ -6,6 +6,32 @@ const CUBE_MIN_HEIGHT = 1;
 const CUBE_MAX_LENGTH = 2.5;
 const CUBE_MIN_LENGTH = 1.5;
 
+// Builds a single bulding/cube.
+export function buildCube(position, scale, scene) {
+    let height = scale.y / 2;
+    const cubeGeo = new THREE.BoxGeometry(scale.x, scale.y, scale.z);
+    const cubeMaterial = new THREE.MeshPhongMaterial({color: hexColor()});
+    const cubeMesh = new THREE.Mesh(cubeGeo, cubeMaterial);
+    cubeMesh.position.set(position.x, position.y + height, position.z);
+    cubeMesh.castShadow = true;
+    cubeMesh.receiveShadow = true;
+    scene.add(cubeMesh);
+    return cubeMesh;
+}
+
+export function buildPointMarker(position, scene) {
+    const sphereGeo = new THREE.SphereGeometry(0.2, 16, 8);
+    const sphereMaterial = new THREE.MeshPhongMaterial({color: 0xFF0000});
+    //sphereMaterial.transparent = true;
+    //sphereMaterial.opacity = 0.5;
+    const sphereMesh = new THREE.Mesh(sphereGeo, sphereMaterial);
+    sphereMesh.position.set(position.x, position.y, position.z);
+    sphereMesh.castShadow = false;
+    sphereMesh.receiveShadow = false;
+    scene.add(sphereMesh);
+    return sphereMesh;
+}
+
 //Builds a city block
 function buildBlock(length, space, origin, scene) {
     for (let j = 0; j < length * space; j += space) {

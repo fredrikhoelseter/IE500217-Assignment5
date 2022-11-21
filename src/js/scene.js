@@ -43,8 +43,62 @@ renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+let selectedObject = null;
+let selectedPlanePoint = null;
+let currentPointMarker = null;
+let updatePosX = 0;
+let updatePosY = 0;
+let updatePosZ = 0;
+
+
 /// GUI
 const gui = new GUI();
+const obj = {
+    translate: "'W''A''S''D'",
+    rotate: "'Q''E'",
+    scale: "'Z''X''R''F''C''V'",
+    delete: "'DELETE''BACKSPACE'",
+    insert: "'ENTER'",
+    
+    posX: updatePosX,
+    posY: updatePosY,
+    posX: updatePosZ,
+    updateBuilding: updateBuilding,
+    
+    deleteBuilding: deleteBuilding,
+    insertBuilding: insertBuilding
+    
+};
+const editFolder = gui.addFolder('Edit selected building');/*
+editFolder.add(obj, 'posX').onChange(value => {
+    alert(value);
+    updatePosX = value;
+});
+
+editFolder.add(obj, 'posY').onChange(value => {
+    //updatePosition.y = value;
+});
+editFolder.add(obj, 'posZ').onChange(value => {
+    //updatePosition.z = value;
+});
+
+editFolder.add(obj, 'updateBuilding');
+*/
+
+editFolder.add(obj, 'deleteBuilding');
+editFolder.close();
+
+const insertFolder = gui.addFolder('Insert new building');
+insertFolder.add(obj, 'insertBuilding');
+insertFolder.close();
+
+const keyFolder = gui.addFolder('Key Bindings');
+keyFolder.add(obj, 'translate');
+keyFolder.add(obj, 'rotate');
+keyFolder.add(obj, 'scale');
+keyFolder.add(obj, 'delete');
+keyFolder.add(obj, 'insert');
+keyFolder.close();
 
 //Controls for camera
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -55,6 +109,35 @@ controls.update();
 const raycaster = new THREE.Raycaster();
 // Mouse position
 const mouse = new THREE.Vector2();
+
+function updateBuilding() {
+    if (selectedObject != null) {
+        selectedObject.position.set(updatePosX, updatePosY, upd);
+    } else {
+        alert('No building selected');
+    }
+}
+
+function deleteBuilding() {
+    if (selectedObject != null) {
+        scene.remove(selectedObject);
+        selectedObject = null;
+    } else {
+        alert('No building selected');
+    }
+}
+
+function insertBuilding() {
+    if (selectedPlanePoint != null) {
+        selectedObject = construction.buildCube(selectedPlanePoint, new THREE.Vector3(1.5, 3, 1.5), scene);
+        selectedPlanePoint = null;
+        if (currentPointMarker != null) {
+            scene.remove(currentPointMarker);
+        }
+    } else {
+        alert('No point on the plane selected');
+    }
+}
 
 /**
  * Updates the position of mouse to the mouse cursor position.
@@ -69,21 +152,30 @@ function onMouseMove(event) {
 
 }
 
-
-let selectedObject = null;
-
 /**
- * Saves the first intersected object from the raycaster to selecteObject variable, 
- * as long as the object is not of geometry type PlaneGeometry.
- * If no objects other then PlaneGeometry intersect with the ray, sets the selected object to null.
+ * If the raycaster hits a non-plane object, will save that object to selectedObjectvariable.
+ * If the raycaster hits a PlaneGeometry object, it will save the intersection position on
+ * the plane to the selectedPlanePoint variable. It will also create a point marker
+ * at the position.
  */
 function onClick() {
     raycaster.setFromCamera(mouse, camera);
     const intersectObjects = raycaster.intersectObjects(scene.children);
-    if (intersectObjects.length > 0 && intersectObjects[0].object.geometry.type != 'PlaneGeometry') {
-        selectedObject = intersectObjects[0].object;
+    if (currentPointMarker != null) {
+        scene.remove(currentPointMarker);
+    }
+    if (intersectObjects.length > 0) {
+        if (intersectObjects[0].object.geometry.type != 'PlaneGeometry') {
+            selectedPlanePoint = null;
+            selectedObject = intersectObjects[0].object;
+        } else {
+            selectedObject = null;
+            selectedPlanePoint = intersectObjects[0].point;
+            currentPointMarker = construction.buildPointMarker(selectedPlanePoint, scene);
+        }
     } else {
         selectedObject = null;
+        selectedPlanePoint = null;
     }
 }
 
@@ -93,7 +185,8 @@ function onClick() {
  */
 function resetMaterials() {
     for (let i = 0; i < scene.children.length; i++) {
-        if (scene.children[i].material && scene.children[i].geometry.type != 'PlaneGeometry') {
+        if (scene.children[i].material && scene.children[i].geometry.type != 'PlaneGeometry' 
+        && scene.children[i].geometry.type != 'SphereGeometry') {
             if (scene.children[i] == selectedObject) {
                 scene.children[i].material.color.set(selectedColor);
             } else if (scene.children[i].geometry.type == 'BoxGeometry') {
@@ -117,7 +210,8 @@ function hoverObject() {
 	// calculate objects intersecting the picking ray
 	const intersectObjects = raycaster.intersectObjects(scene.children);
     if (intersectObjects.length > 0) {
-        if (intersectObjects[0].object.geometry.type != 'PlaneGeometry' && intersectObjects[0].object != selectedObject) {
+        if (intersectObjects[0].object.geometry.type != 'PlaneGeometry' && intersectObjects[0].object != selectedObject
+        && intersectObjects[0].object.geometry.type != 'SphereGeometry') {
 	        intersectObjects[0].object.material.color.set(hoverColor);
         }
         //intersects[0].object.material.transparent = true;
@@ -149,18 +243,38 @@ function onDocumentKeyDown(event) {
     const moveStep = 0.25;
     const rotationStep = Math.PI/32;
     const scaleStep = 0.1;
-    if (selectedObject == null) {
-        console.log("No object selected");
-    } else {
+    if (selectedPlanePoint == null && selectedObject == null) {
+        console.log("No object or point selected.");
+    } else if (selectedPlanePoint != null && selectedObject != null) {
+        console.log("Something went wrong, selectedPlanePoint and selectedObject were both " +
+        "not null at the same time, which should not happen.");
+    } else if (selectedPlanePoint != null) {
+        switch (keyCode) {
+            /////////    INSERT NEW CUBE OBJECT    /////////
+            // Enter
+            case 13:
+                // Insert a new cube to the scene and assign the selectedObject to it.
+                selectedObject = construction.buildCube(selectedPlanePoint, new THREE.Vector3(1.5, 3, 1.5), scene);
+                selectedPlanePoint = null;
+                if (currentPointMarker != null) {
+                    scene.remove(currentPointMarker);
+                }
+                break;
+            /////////    INSERT NEW CUBE OBJECT    /////////
+
+            default:
+                return;
+        }
+    } else if (selectedObject != null) {
         switch (keyCode) {
             /////////    DELETE SELECTED OBJECT    /////////
             // Backspace
             case 8:    
-                scene.remove(selectedObject);
+                deleteBuilding();
                 break;
             // Delete
             case 46:
-                scene.remove(selectedObject);
+                deleteBuilding();
                 break;
             /////////    DELETE SELECTED OBJECT    /////////
 
@@ -244,7 +358,7 @@ function onDocumentKeyDown(event) {
             default:
                 return;
         }
-    };
+    } 
 }
 
 function animate() {
