@@ -3,16 +3,17 @@ import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.17/+esm';
 import { OrbitControls } from "./OrbitControls.js";
 import * as construction from "./construction.js"
 import * as light from "./lighting.js";
+import * as sun from "./sun.js";
 
 
 const landmarkColor = 0xFFD700;
-const hoverColor = 0xFF9900;
+const hoverColor = 0x99FF00;
 const selectedColor = 0xFF0000;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x5D3FD3);
 
-//Camera
+// Camera
 const FOV = 20;
 const ASPECT = window.innerWidth / window.innerHeight;
 const NEAR = 0.1;
@@ -21,27 +22,30 @@ const camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR);
 camera.position.set(-70, 30, -100);
 camera.lookAt(0, 0, 0);
 
-//Ground for the city
+// Ground for the city
 construction.buildPlane(25, 40, new THREE.Vector3(0,0,0), new THREE.MeshPhongMaterial({color: 0x747474}), scene);
 
-construction.buildPlane(8, 15, new THREE.Vector3(0, 0.1, -3), new THREE.MeshPhongMaterial({color: 0x008013}), scene);
+construction.buildPlane(8, 15, new THREE.Vector3(0, 0.1, -3), new THREE.MeshPhongMaterial({color: 0xa5f245}), scene);
 
-//Complex buildings for the city
+// Complex buildings for the city
 construction.createCityBlocks(scene);
 
 //Landmark for the city
 construction.buildLandMark(6,8,4, new THREE.MeshPhongMaterial({color: landmarkColor}), scene);
 
-//Lighting
-light.ambientLighting(0xFFFFFF, 0.5, scene);
-light.directionalLighting(0xFFFFFF, 0.7, new THREE.Vector3(10, 15, -30), scene);
 
-//Render the scene
+// Lighting
+light.ambientLighting(0xFFFFFF, 0.5, scene);
+//light.directionalLighting(0xFFFFFF, 0.7, new THREE.Vector3(10, 15, -30), scene);
+//light.pointLighting(0xFFFFFF, 0.1, new THREE.Vector3(-30, 0, 0), scene);
+
+// Render the scene
 const renderer = new THREE.WebGLRenderer();
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
 
 let selectedObject = null;
 let selectedPlanePoint = null;
@@ -51,7 +55,15 @@ let updatePosY = 0;
 let updatePosZ = 0;
 
 
-/// GUI
+// Create the sun
+const mySun = new sun.Sun(false, scene, renderer, camera);
+
+
+// Animate the sun
+mySun.animateOrbit();
+
+
+// GUI
 const gui = new GUI();
 const obj = {
     translate: "'W''A''S''D'",
@@ -69,21 +81,12 @@ const obj = {
     insertBuilding: insertBuilding
     
 };
-const editFolder = gui.addFolder('Edit selected building');/*
-editFolder.add(obj, 'posX').onChange(value => {
-    alert(value);
-    updatePosX = value;
+const editFolder = gui.addFolder('Edit selected building');
+
+gui.add(mySun, 'isCycling').onChange(value => {
+    mySun.animateOrbit();
 });
 
-editFolder.add(obj, 'posY').onChange(value => {
-    //updatePosition.y = value;
-});
-editFolder.add(obj, 'posZ').onChange(value => {
-    //updatePosition.z = value;
-});
-
-editFolder.add(obj, 'updateBuilding');
-*/
 
 editFolder.add(obj, 'deleteBuilding');
 editFolder.close();
@@ -100,7 +103,7 @@ keyFolder.add(obj, 'delete');
 keyFolder.add(obj, 'insert');
 keyFolder.close();
 
-//Controls for camera
+// Controls for camera
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 5, 0);
 controls.update();
@@ -112,7 +115,7 @@ const mouse = new THREE.Vector2();
 
 function updateBuilding() {
     if (selectedObject != null) {
-        selectedObject.position.set(updatePosX, updatePosY, upd);
+        selectedObject.position.set(updatePosX, updatePosY, updatePosZ);
     } else {
         alert('No building selected');
     }
@@ -190,7 +193,7 @@ function resetMaterials() {
             if (scene.children[i] == selectedObject) {
                 scene.children[i].material.color.set(selectedColor);
             } else if (scene.children[i].geometry.type == 'BoxGeometry') {
-                scene.children[i].material.color.set(0x00ff00);
+                scene.children[i].material.color.set(0xFFFFFF);
             } else {
                 scene.children[i].material.color.set(landmarkColor);
             }
