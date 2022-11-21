@@ -4,6 +4,8 @@ import { OrbitControls } from "./OrbitControls.js";
 import * as construction from "./construction.js"
 import * as light from "./lighting.js";
 import * as sun from "./sun.js";
+import * as keyCommands from "./keycommands.js";
+import * as objectController from "./object-controller.js";
 
 
 const landmarkColor = 0xFFD700;
@@ -46,14 +48,10 @@ renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-
+// Selection variables
 let selectedObject = null;
 let selectedPlanePoint = null;
 let currentPointMarker = null;
-let updatePosX = 0;
-let updatePosY = 0;
-let updatePosZ = 0;
-
 
 // Create the sun
 const mySun = new sun.Sun(false, scene, renderer, camera);
@@ -71,11 +69,6 @@ const obj = {
     scale: "'Z''X''R''F''C''V'",
     delete: "'DELETE''BACKSPACE'",
     insert: "'ENTER'",
-    
-    posX: updatePosX,
-    posY: updatePosY,
-    posZ: updatePosZ,
-    updateBuilding: updateBuilding,
     
     deleteBuilding: deleteBuilding,
     insertBuilding: insertBuilding
@@ -113,33 +106,12 @@ const raycaster = new THREE.Raycaster();
 // Mouse position
 const mouse = new THREE.Vector2();
 
-function updateBuilding() {
-    if (selectedObject != null) {
-        selectedObject.position.set(updatePosX, updatePosY, updatePosZ);
-    } else {
-        alert('No building selected');
-    }
-}
-
 function deleteBuilding() {
-    if (selectedObject != null) {
-        scene.remove(selectedObject);
-        selectedObject = null;
-    } else {
-        alert('No building selected');
-    }
+    objectController.deleteObject(selectedObject, scene)
 }
 
 function insertBuilding() {
-    if (selectedPlanePoint != null) {
-        selectedObject = construction.buildCube(selectedPlanePoint, new THREE.Vector3(1.5, 3, 1.5), scene);
-        selectedPlanePoint = null;
-        if (currentPointMarker != null) {
-            scene.remove(currentPointMarker);
-        }
-    } else {
-        alert('No point on the plane selected');
-    }
+    objectController.insertObjectOnPlane(selectedObject, selectedPlanePoint, scene, currentPointMarker);
 }
 
 /**
@@ -167,18 +139,26 @@ function onClick() {
     if (currentPointMarker != null) {
         scene.remove(currentPointMarker);
     }
-    if (intersectObjects.length > 0) {
-        if (intersectObjects[0].object.geometry.type != 'PlaneGeometry') {
-            selectedPlanePoint = null;
-            selectedObject = intersectObjects[0].object;
-        } else {
-            selectedObject = null;
-            selectedPlanePoint = intersectObjects[0].point;
-            currentPointMarker = construction.buildPointMarker(selectedPlanePoint, scene);
-        }
-    } else {
+    // Checks to see if the ray has intersected with any object.
+    if (intersectObjects.length <= 0) {
         selectedObject = null;
         selectedPlanePoint = null;
+        return;
+    }
+    // Checks if the first intersect object is a sphere.
+    // Avoids being able to select the sun.
+    if (intersectObjects[0].object.geometry.type == 'SphereGeometry') {
+        selectedObject = null;
+        selectedPlanePoint = null;
+        return;
+    }
+    if (intersectObjects[0].object.geometry.type != 'PlaneGeometry') {
+        selectedPlanePoint = null;
+        selectedObject = intersectObjects[0].object;
+    } else {
+        selectedObject = null;
+        selectedPlanePoint = intersectObjects[0].point;
+        currentPointMarker = construction.buildPointMarker(selectedPlanePoint, scene);
     }
 }
 
@@ -243,141 +223,20 @@ window.addEventListener("keydown", onDocumentKeyDown, false);
  */
 function onDocumentKeyDown(event) {
     let keyCode = event.which;
-    const moveStep = 0.25;
-    const rotationStep = Math.PI/32;
-    const scaleStep = 0.1;
     if (selectedPlanePoint == null && selectedObject == null) {
         console.log("No object or point selected.");
     } else if (selectedPlanePoint != null && selectedObject != null) {
         console.log("Something went wrong, selectedPlanePoint and selectedObject were both " +
         "not null at the same time, which should not happen.");
     } else if (selectedPlanePoint != null) {
-        switch (keyCode) {
-            /////////    INSERT NEW CUBE OBJECT    /////////
-            // Enter
-            case 13:
-                // Insert a new cube to the scene and assign the selectedObject to it.
-                selectedObject = construction.buildCube(selectedPlanePoint, new THREE.Vector3(1.5, 3, 1.5), scene);
-                selectedPlanePoint = null;
-                if (currentPointMarker != null) {
-                    scene.remove(currentPointMarker);
-                }
-                break;
-            /////////    INSERT NEW CUBE OBJECT    /////////
 
-            default:
-                return;
-        }
+        keyCommands.pointSelectedKeyEvents(keyCode, selectedObject, selectedPlanePoint, scene);
+
     } else if (selectedObject != null) {
-        switch (keyCode) {
-            /////////    DELETE SELECTED OBJECT    /////////
-            // Backspace
-            case 8:    
-                deleteBuilding();
-                break;
-            // Delete
-            case 46:
-                deleteBuilding();
-                break;
-            /////////    DELETE SELECTED OBJECT    /////////
 
-        
+        keyCommands.objectSelectedKeyEvents(keyCode, selectedObject, selectedPlanePoint, scene, currentPointMarker);
 
-            /////////    MOVE SELECTED OBJECT    /////////
-            // A
-            case 65:
-                // Move selectedObject in positive x-direction.
-                selectedObject.position.x += moveStep
-                break;
-            // D
-            case 68:
-                // Move selectedObject in negative x-direction.
-                selectedObject.position.x -= moveStep
-                break;
-            // W
-            case 87:
-                // Move selectedObject in positive z-direction.
-                selectedObject.position.z += moveStep
-                break;
-            // S
-            case 83:
-                // Move selectedObject in negative z-direction.
-                selectedObject.position.z -= moveStep
-                break;
-            /////////    MOVE SELECTED OBJECT    /////////
-
-
-
-            /////////    ROTATE SELECTED OBJECT    /////////
-            // Q
-            case 81:
-                // Rotate selected object clockwise around y-axis.
-                selectedObject.rotation.y -= rotationStep;
-                break;
-            // E
-            case 69:
-                // Rotate selected object counter-clockwise around y-axis.
-                selectedObject.rotation.y += rotationStep;
-                break;
-            /////////    ROTATE SELECTED OBJECT    /////////
-
-
-
-            /////////    SCALE SELECTED OBJECT    /////////
-            // Z
-            case 90:
-                // Scale up x.
-                selectedObject.scale.x += scaleStep;
-                break;
-            // X
-            case 88:
-                // Scale down x.
-                selectedObject.scale.x -= scaleStep;
-                break;
-            // C
-            case 67:
-                // Scale up z.
-                selectedObject.scale.z += scaleStep;
-                break;
-            // V
-            case 86:
-                // Scale down z.
-                selectedObject.scale.z -= scaleStep;
-                break;
-            // R
-            case 82:
-                // Scale up y.
-                scaleObjectY(selectedObject, scaleStep, true);
-                break;
-            // F
-            case 70:
-                // Scale down y.
-                scaleObjectY(selectedObject, scaleStep, false);
-                break;
-            /////////    SCALE SELECTED OBJECT    /////////
-
-            default:
-                return;
-        }
     } 
-}
-
-function scaleObjectY(selectedObject, scaleStep, isPositive) {
-    if (isPositive) {
-        selectedObject.scale.y += scaleStep;
-    } else {
-        selectedObject.scale.y -= scaleStep;
-    }
-
-    const geometry = selectedObject.geometry;
-    geometry.computeBoundingBox();
-    const bb = geometry.boundingBox;
-    const object3DHeight = bb.max.y - bb.min.y;
-    if (isPositive) {
-        selectedObject.position.y += object3DHeight*scaleStep/2;
-    } else {
-        selectedObject.position.y -= object3DHeight*scaleStep/2;
-    }
 }
 
 function animate() {
