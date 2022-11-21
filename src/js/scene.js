@@ -74,7 +74,7 @@ const obj = {
     
     posX: updatePosX,
     posY: updatePosY,
-    posX: updatePosZ,
+    posZ: updatePosZ,
     updateBuilding: updateBuilding,
     
     deleteBuilding: deleteBuilding,
@@ -347,14 +347,12 @@ function onDocumentKeyDown(event) {
             // R
             case 82:
                 // Scale up y.
-                selectedObject.scale.y += scaleStep;
-                // TODO: Adjust y position so the object only scales "upwards"
+                scaleObjectY(selectedObject, scaleStep, true);
                 break;
             // F
             case 70:
                 // Scale down y.
-                selectedObject.scale.y -= scaleStep;
-                // TODO: Adjust y position so the object only downscales "upwards"
+                scaleObjectY(selectedObject, scaleStep, false);
                 break;
             /////////    SCALE SELECTED OBJECT    /////////
 
@@ -362,6 +360,24 @@ function onDocumentKeyDown(event) {
                 return;
         }
     } 
+}
+
+function scaleObjectY(selectedObject, scaleStep, isPositive) {
+    if (isPositive) {
+        selectedObject.scale.y += scaleStep;
+    } else {
+        selectedObject.scale.y -= scaleStep;
+    }
+
+    const geometry = selectedObject.geometry;
+    geometry.computeBoundingBox();
+    const bb = geometry.boundingBox;
+    const object3DHeight = bb.max.y - bb.min.y;
+    if (isPositive) {
+        selectedObject.position.y += object3DHeight*scaleStep/2;
+    } else {
+        selectedObject.position.y -= object3DHeight*scaleStep/2;
+    }
 }
 
 function animate() {
