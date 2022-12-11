@@ -61,6 +61,7 @@ export function buildPlane(width, length, origin, material, scene){
     planeMesh.position.set(origin.x, origin.y, origin.z);
     planeMesh.rotation.x = Math.PI * -.5;
     scene.add(planeMesh);
+    return planeMesh;
 }
 
 //Square pyramid

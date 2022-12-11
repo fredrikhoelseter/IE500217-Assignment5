@@ -1,11 +1,12 @@
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.17/+esm';
 
 import { OrbitControls } from "./OrbitControls.js";
-import * as construction from "./construction.js"
+import * as construction from "./construction.js";
 import * as light from "./lighting.js";
 import * as sun from "./sun.js";
 import * as keyCommands from "./keycommands.js";
 import * as objectController from "./object-controller.js";
+import * as shadowVariation from "./shadow-variation.js";
 
 
 const landmarkColor = 0xFFD700;
@@ -27,7 +28,8 @@ camera.lookAt(0, 0, 0);
 // Ground for the city
 construction.buildPlane(25, 40, new THREE.Vector3(0,0,0), new THREE.MeshPhongMaterial({color: 0x747474}), scene);
 
-construction.buildPlane(8, 15, new THREE.Vector3(0, 0.1, -3), new THREE.MeshPhongMaterial({color: 0xa5f245}), scene);
+const park = construction.buildPlane(8, 15, new THREE.Vector3(0, 0.1, -3), new THREE.MeshPhongMaterial({color: 0xa5f245}), scene);
+
 
 // Complex buildings for the city
 construction.createCityBlocks(scene);
@@ -56,10 +58,10 @@ let currentPointMarker = null;
 // Create the sun
 const mySun = new sun.Sun(false, scene, renderer, camera);
 
-
 // Animate the sun
 mySun.animateOrbit();
 
+const shadowVar = new shadowVariation.ShadowVariation(park, mySun, scene);
 
 // GUI
 const gui = new GUI();
@@ -71,7 +73,9 @@ const obj = {
     insert: "'ENTER'",
     
     deleteBuilding: deleteBuilding,
-    insertBuilding: insertBuilding
+    insertBuilding: insertBuilding,
+    calculateShadow: shadowTest,
+    deleteHeatmap: deleteHeatmap
     
 };
 const editFolder = gui.addFolder('Edit selected building');
@@ -79,6 +83,9 @@ const editFolder = gui.addFolder('Edit selected building');
 gui.add(mySun, 'isCycling').onChange(value => {
     mySun.animateOrbit();
 });
+gui.add(obj, "calculateShadow");
+gui.add(obj, "deleteHeatmap");
+
 
 
 editFolder.add(obj, 'deleteBuilding');
@@ -101,6 +108,14 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 5, 0);
 controls.update();
 
+function shadowTest() {
+    shadowVar.calculateShadowVariation();
+}
+
+function deleteHeatmap() {
+    shadowVar.deleteHeatMap();
+}
+
 // Raycaster for mouse to world position.
 const raycaster = new THREE.Raycaster();
 // Mouse position
@@ -121,7 +136,6 @@ function onMouseMove(event) {
 
 	// calculate pointer position in normalized device coordinates
 	// (-1 to +1) for both components
-
 	mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 	mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
