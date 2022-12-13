@@ -1,13 +1,13 @@
 import * as objectController from "./object-controller.js";
 import * as construction from "./construction.js";
 
-export function pointSelectedKeyEvents(keyCode, selectedObject, selectedPlanePoint, scene) {
+export function pointSelectedKeyEvents(keyCode, selectedObject, selectedPlanePoint, scene, selectableList) {
     switch (keyCode) {
         /////////    INSERT NEW CUBE OBJECT    /////////
         // Enter
         case 13:
             // Insert a new cube to the scene and assign the selectedObject to it.
-            selectedObject = construction.buildCube(selectedPlanePoint, new THREE.Vector3(1.5, 3, 1.5), scene);
+            selectedObject = construction.buildCube(selectedPlanePoint, new THREE.Vector3(1.5, 3, 1.5), scene, selectableList);
             selectedPlanePoint = null;
             if (currentPointMarker != null) {
                 scene.remove(currentPointMarker);
@@ -20,7 +20,7 @@ export function pointSelectedKeyEvents(keyCode, selectedObject, selectedPlanePoi
     }
 }
 
-export function objectSelectedKeyEvents(keyCode, selectedObject, pointOnPlane, scene, pointMarker) {
+export function objectSelectedKeyEvents(keyCode, selectedObject, pointOnPlane, scene, pointMarker, selectableList) {
     const moveStep = 0.25;
     const rotationStep = Math.PI/32;
     const scaleStep = 0.1;
@@ -28,11 +28,11 @@ export function objectSelectedKeyEvents(keyCode, selectedObject, pointOnPlane, s
         /////////    DELETE SELECTED OBJECT    /////////
         // Backspace
         case 8:    
-            objectController.deleteObject(selectedObject, scene)
+            objectController.deleteObject(selectedObject, scene, selectableList)
             break;
         // Delete
         case 46:
-            objectController.insertObjectOnPlane(selectedObject, pointOnPlane, scene, pointMarker);
+            objectController.deleteObject(selectedObject, scene, selectableList);
             break;
         /////////    DELETE SELECTED OBJECT    /////////
 

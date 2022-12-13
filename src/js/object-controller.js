@@ -1,17 +1,19 @@
 import * as construction from './construction.js';
 
-export function deleteObject(object, scene) {
+export function deleteObject(object, scene, selectableList) {
     if (object != null) {
+        selectableList.splice(selectableList.indexOf(object), 1);
         scene.remove(object);
+        
         object = null;
     } else {
         alert('No building selected');
     }
 }
 
-export function insertObjectOnPlane(object, pointOnPlane, scene, pointMarker) {
+export function insertObjectOnPlane(pointOnPlane, scene, pointMarker, selectableList) {
     if (pointOnPlane != null) {
-        object = construction.buildCube(pointOnPlane, new THREE.Vector3(1.5, 3, 1.5), scene);
+        construction.buildCube(pointOnPlane, new THREE.Vector3(1.5, 3, 1.5), scene, selectableList);
         pointOnPlane = null;
         if (pointMarker != null) {
             scene.remove(pointMarker);

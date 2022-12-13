@@ -13,6 +13,8 @@ const landmarkColor = 0xFFD700;
 const hoverColor = 0x99FF00;
 const selectedColor = 0xFF0000;
 
+let selectableList = [];
+
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x5D3FD3);
 
@@ -26,16 +28,16 @@ camera.position.set(-70, 30, -100);
 camera.lookAt(0, 0, 0);
 
 // Ground for the city
-construction.buildPlane(25, 40, new THREE.Vector3(0,0,0), new THREE.MeshPhongMaterial({color: 0x747474}), scene);
+construction.buildPlane(25, 40, new THREE.Vector3(0,0,0), new THREE.MeshPhongMaterial({color: 0x747474}), scene, selectableList);
 
-const park = construction.buildPlane(8, 15, new THREE.Vector3(0, 0.1, -3), new THREE.MeshPhongMaterial({color: 0xa5f245}), scene);
+const park = construction.buildPlane(8, 15, new THREE.Vector3(0, 0.1, -3), new THREE.MeshPhongMaterial({color: 0xa5f245}), scene, selectableList);
 
 
 // Complex buildings for the city
-construction.createCityBlocks(scene);
+construction.createCityBlocks(scene, selectableList);
 
 //Landmark for the city
-construction.buildLandMark(6,8,4, new THREE.MeshPhongMaterial({color: landmarkColor}), scene);
+construction.buildLandMark(6,8,4, new THREE.MeshPhongMaterial({color: landmarkColor}), scene, selectableList);
 
 
 // Lighting
@@ -122,11 +124,11 @@ const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
 function deleteBuilding() {
-    objectController.deleteObject(selectedObject, scene)
+    objectController.deleteObject(selectedObject, scene, selectableList)
 }
 
 function insertBuilding() {
-    objectController.insertObjectOnPlane(selectedObject, selectedPlanePoint, scene, currentPointMarker);
+    objectController.insertObjectOnPlane(selectedPlanePoint, scene, currentPointMarker, selectableList);
 }
 
 /**
@@ -149,7 +151,7 @@ function onMouseMove(event) {
  */
 function onClick() {
     raycaster.setFromCamera(mouse, camera);
-    const intersectObjects = raycaster.intersectObjects(scene.children);
+    const intersectObjects = raycaster.intersectObjects(selectableList);
     if (currentPointMarker != null) {
         scene.remove(currentPointMarker);
     }
@@ -181,15 +183,14 @@ function onClick() {
  * the buildings are reset to a green color.
  */
 function resetMaterials() {
-    for (let i = 0; i < scene.children.length; i++) {
-        if (scene.children[i].material && scene.children[i].geometry.type != 'PlaneGeometry' 
-        && scene.children[i].geometry.type != 'SphereGeometry') {
-            if (scene.children[i] == selectedObject) {
-                scene.children[i].material.color.set(selectedColor);
-            } else if (scene.children[i].geometry.type == 'BoxGeometry') {
-                scene.children[i].material.color.set(0xFFFFFF);
+    for (let i = 0; i < selectableList.length; i++) {
+        if (selectableList[i].material && selectableList[i].geometry.type != 'PlaneGeometry') {
+            if (selectableList[i] == selectedObject) {
+                selectableList[i].material.color.set(selectedColor);
+            } else if (selectableList[i].geometry.type == 'BoxGeometry') {
+                selectableList[i].material.color.set(0xFFFFFF);
             } else {
-                scene.children[i].material.color.set(landmarkColor);
+                selectableList[i].material.color.set(landmarkColor);
             }
             
             //scene.children[i].material.transparent = false;
@@ -205,7 +206,7 @@ function hoverObject() {
 	raycaster.setFromCamera(mouse, camera);
 
 	// calculate objects intersecting the picking ray
-	const intersectObjects = raycaster.intersectObjects(scene.children);
+	const intersectObjects = raycaster.intersectObjects(selectableList);
     if (intersectObjects.length > 0) {
         if (intersectObjects[0].object.geometry.type != 'PlaneGeometry' && intersectObjects[0].object != selectedObject
         && intersectObjects[0].object.geometry.type != 'SphereGeometry') {
@@ -244,11 +245,11 @@ function onDocumentKeyDown(event) {
         "not null at the same time, which should not happen.");
     } else if (selectedPlanePoint != null) {
 
-        keyCommands.pointSelectedKeyEvents(keyCode, selectedObject, selectedPlanePoint, scene);
+        keyCommands.pointSelectedKeyEvents(keyCode, selectedObject, selectedPlanePoint, scene, selectableList);
 
     } else if (selectedObject != null) {
 
-        keyCommands.objectSelectedKeyEvents(keyCode, selectedObject, selectedPlanePoint, scene, currentPointMarker);
+        keyCommands.objectSelectedKeyEvents(keyCode, selectedObject, selectedPlanePoint, scene, currentPointMarker, selectableList);
 
     } 
 }

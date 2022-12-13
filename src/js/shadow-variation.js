@@ -2,10 +2,11 @@ import * as construction from "./construction.js";
  
 
 export class ShadowVariation {
-    constructor(plane, sun, scene) {
+    constructor(plane, sun, scene, selectableList) {
         this.plane = plane;
         this.sun = sun;
         this.scene = scene;
+        this.selectableList = selectableList;
         
         this.samplesX = 32;
         this.samplesY = 60;
@@ -66,7 +67,7 @@ export class ShadowVariation {
                         const material = new THREE.MeshPhongMaterial({color: 0xFF0000});
                         material.transparent = true;
                         material.opacity = (this.planeSamples[count-1]*20)/(this.samplesX*this.samplesY);
-                        let mesh = construction.buildPlane(object3DWidth/this.samplesX, object3DHeight/this.samplesY, position, material, this.scene);
+                        let mesh = construction.buildPlane(object3DWidth/this.samplesX, object3DHeight/this.samplesY, position, material, this.scene, null);
                         mesh.receiveShadow = false;
                         this.meshes.push(mesh);
                      } 

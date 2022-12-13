@@ -9,7 +9,7 @@ const CUBE_MAX_LENGTH = 2.5;
 const CUBE_MIN_LENGTH = 1.5;
 
 // Builds a single bulding/cube.
-export function buildCube(position, scale, scene) {
+export function buildCube(position, scale, scene, selectableList) {
     let height = scale.y / 2;
     const cubeGeo = new THREE.BoxGeometry(scale.x, scale.y, scale.z);
     const cubeMaterial = materials.randomMaterial();
@@ -18,6 +18,7 @@ export function buildCube(position, scale, scene) {
     cubeMesh.castShadow = true;
     cubeMesh.receiveShadow = true;
     scene.add(cubeMesh);
+    selectableList.push(cubeMesh);
     return cubeMesh;
 }
 
@@ -35,7 +36,7 @@ export function buildPointMarker(position, scene) {
 }
 
 //Builds a city block
-function buildBlock(length, space, origin, scene) {
+function buildBlock(length, space, origin, scene, selectableList) {
     for (let j = 0; j < length * space; j += space) {
         let cubeWidth = (Math.random() * (CUBE_MAX_WIDTH - CUBE_MIN_WIDTH)) + CUBE_MIN_WIDTH;
         let cubeHeight = (Math.random() * (CUBE_MAX_HEIGHT - CUBE_MIN_HEIGHT)) + CUBE_MIN_HEIGHT;
@@ -49,11 +50,12 @@ function buildBlock(length, space, origin, scene) {
         cubeMesh.receiveShadow = true;
         cubeMesh.position.set(origin.x, origin.y + height, origin.z + j);
         scene.add(cubeMesh);
+        selectableList.push(cubeMesh);
     }
 }
 
 //Plane
-export function buildPlane(width, length, origin, material, scene){
+export function buildPlane(width, length, origin, material, scene, selectableList){
     const planeGeo = new THREE.PlaneGeometry(width, length);
     const planeMesh = new THREE.Mesh(planeGeo, material);
     planeMesh.receiveShadow = true;
@@ -61,11 +63,15 @@ export function buildPlane(width, length, origin, material, scene){
     planeMesh.position.set(origin.x, origin.y, origin.z);
     planeMesh.rotation.x = Math.PI * -.5;
     scene.add(planeMesh);
+    if (selectableList != null) {
+        selectableList.push(planeMesh);
+    }
+    
     return planeMesh;
 }
 
 //Square pyramid
-export function buildLandMark(radius, height, segments, material, scene){
+export function buildLandMark(radius, height, segments, material, scene, selectableList){
     const pyramidGeo = new THREE.ConeBufferGeometry(radius, height, segments);
     const pyramidMesh = new THREE.Mesh(pyramidGeo, material);
     pyramidMesh.rotation.y = 150;
@@ -73,14 +79,15 @@ export function buildLandMark(radius, height, segments, material, scene){
     pyramidMesh.receiveShadow = true;
     pyramidMesh.castShadow = true;
     scene.add(pyramidMesh);
+    selectableList.push(pyramidMesh);
 }
 
 //Creates all city blocks
-export function createCityBlocks(scene){
-    buildBlock(9, 4, new THREE.Vector3(-10.5, 0, -18), scene);
-    buildBlock(9, 4, new THREE.Vector3(10.5, 0, -18), scene);
-    buildBlock(7, 4, new THREE.Vector3(-6.5, 0, -18), scene);
-    buildBlock(7, 4, new THREE.Vector3(6.5, 0, -18), scene);
-    buildBlock(2, 4, new THREE.Vector3(-2.5, 0, -18), scene);
-    buildBlock(2, 4, new THREE.Vector3(2.5, 0, -18), scene);
+export function createCityBlocks(scene, selectableList){
+    buildBlock(9, 4, new THREE.Vector3(-10.5, 0, -18), scene, selectableList);
+    buildBlock(9, 4, new THREE.Vector3(10.5, 0, -18), scene, selectableList);
+    buildBlock(7, 4, new THREE.Vector3(-6.5, 0, -18), scene, selectableList);
+    buildBlock(7, 4, new THREE.Vector3(6.5, 0, -18), scene, selectableList);
+    buildBlock(2, 4, new THREE.Vector3(-2.5, 0, -18), scene, selectableList);
+    buildBlock(2, 4, new THREE.Vector3(2.5, 0, -18), scene, selectableList);
 }
