@@ -9,16 +9,13 @@ export class ShadowVariation {
         
         this.samplesX = 32;
         this.samplesY = 60;
-        this.planeSamples = new Uint16Array(this.samplesX * this.samplesY);
-        for (let x = 0; x < this.samplesX * this.samplesY; x++) {
-            this.planeSamples[x] = 0;
-        }
+        this.planeSamples = this.resetPlaneSamples();
         this.meshes = [];
         this.planePoints = [];
     }
 
-    calculateShadowVariation() {
-        
+    createHeatMap() {
+        this.deleteHeatMap();
         this.scene.remove(this.sun.sun)
         for (let x = 0; x <= 0.5; x += 0.005) {
             this.calculateFrameShadow(false, x);
@@ -28,10 +25,9 @@ export class ShadowVariation {
         this.resetPlaneSamples();
     }
 
-    /// Does not work for some reasen :(
     deleteHeatMap() {
         for (let index = 0; index < this.meshes.length; index++) {
-            this.scene.remove[index];
+            this.scene.remove(this.meshes[index]);
         }
         this.meshes = [];
     }

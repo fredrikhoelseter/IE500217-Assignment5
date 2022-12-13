@@ -109,7 +109,7 @@ controls.target.set(0, 5, 0);
 controls.update();
 
 function shadowTest() {
-    shadowVar.calculateShadowVariation();
+    shadowVar.createHeatMap();
 }
 
 function deleteHeatmap() {
