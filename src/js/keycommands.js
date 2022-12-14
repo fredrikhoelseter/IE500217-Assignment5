@@ -1,5 +1,5 @@
 import * as objectController from "./object-controller.js";
-import * as construction from "./construction.js";
+import * as buildings from "./buildings.js";
 
 export function pointSelectedKeyEvents(keyCode, selectedObject, selectedPlanePoint, scene, selectableList) {
     switch (keyCode) {
@@ -7,7 +7,7 @@ export function pointSelectedKeyEvents(keyCode, selectedObject, selectedPlanePoi
         // Enter
         case 13:
             // Insert a new cube to the scene and assign the selectedObject to it.
-            selectedObject = construction.buildCube(selectedPlanePoint, new THREE.Vector3(1.5, 3, 1.5), scene, selectableList);
+            selectedObject = buildings.buildCube(selectedPlanePoint, new THREE.Vector3(1.5, 3, 1.5), scene, selectableList);
             selectedPlanePoint = null;
             if (currentPointMarker != null) {
                 scene.remove(currentPointMarker);

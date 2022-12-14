@@ -1,4 +1,4 @@
-import * as construction from './construction.js';
+import * as buildings from './buildings.js';
 
 export function deleteObject(object, scene, selectableList) {
     if (object != null) {
@@ -13,7 +13,7 @@ export function deleteObject(object, scene, selectableList) {
 
 export function insertObjectOnPlane(pointOnPlane, scene, pointMarker, selectableList) {
     if (pointOnPlane != null) {
-        construction.buildCube(pointOnPlane, new THREE.Vector3(1.5, 3, 1.5), scene, selectableList);
+        buildings.buildCube(pointOnPlane, new THREE.Vector3(1.5, 3, 1.5), scene, selectableList);
         pointOnPlane = null;
         if (pointMarker != null) {
             scene.remove(pointMarker);
