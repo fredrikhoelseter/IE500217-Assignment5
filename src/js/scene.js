@@ -1,13 +1,12 @@
 import GUI from 'https://cdn.jsdelivr.net/npm/lil-gui@0.17/+esm';
-
-import { OrbitControls } from "./OrbitControls.js";
-import * as construction from "./construction.js";
+import {OrbitControls} from "./OrbitControls.js";
+import * as buildings from "./buildings.js";
 import * as light from "./lighting.js";
 import * as sun from "./sun.js";
 import * as keyCommands from "./keycommands.js";
 import * as objectController from "./object-controller.js";
 import * as shadowVariation from "./shadow-variation.js";
-
+import {calculateLightSensor} from "./lightIntensity.js";
 
 const landmarkColor = 0xFFD700;
 const hoverColor = 0x99FF00;
@@ -16,51 +15,56 @@ const selectedColor = 0xFF0000;
 let selectableList = [];
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x5D3FD3);
+scene.background = new THREE.Color(0x29D9EE);
 
-// Camera
+// Camera.
 const FOV = 20;
 const ASPECT = window.innerWidth / window.innerHeight;
 const NEAR = 0.1;
 const FAR = 1000;
+
 const camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR);
 camera.position.set(-70, 30, -100);
 camera.lookAt(0, 0, 0);
 
-// Ground for the city
-construction.buildPlane(25, 40, new THREE.Vector3(0,0,0), new THREE.MeshPhongMaterial({color: 0x747474}), scene, selectableList);
+// Ground for the city.
+buildings.buildPlane(25, 40, new THREE.Vector3(0, 0, 0),
+    new THREE.MeshPhongMaterial({color: 0x747474}), scene, selectableList);
 
-const park = construction.buildPlane(8, 15, new THREE.Vector3(0, 0.1, -3), new THREE.MeshPhongMaterial({color: 0xa5f245}), scene, selectableList);
+// Park for the city.
+const park = buildings.buildPlane(8, 15, new THREE.Vector3(0, 0.1, -3),
+    new THREE.MeshPhongMaterial({color: 0xa5f245}), scene, selectableList);
 
+// Complex buildings for the city.
+buildings.createCityBlocks(scene, selectableList);
 
-// Complex buildings for the city
-construction.createCityBlocks(scene, selectableList);
+// Landmark for the city.
+buildings.buildLandMark(6, 8, 4,
+    new THREE.MeshPhongMaterial({color: landmarkColor}), scene, selectableList);
 
-//Landmark for the city
-construction.buildLandMark(6,8,4, new THREE.MeshPhongMaterial({color: landmarkColor}), scene, selectableList);
-
-
-// Lighting
+// Ambient lighting for the scene.
 light.ambientLighting(0xFFFFFF, 0.5, scene);
-//light.directionalLighting(0xFFFFFF, 0.7, new THREE.Vector3(10, 15, -30), scene);
-//light.pointLighting(0xFFFFFF, 0.1, new THREE.Vector3(-30, 0, 0), scene);
 
-// Render the scene
+// Two light sensors for the city.
+let lightSensor1 = buildings.buildLightMarker(new THREE.Vector3(10, 0, 18), scene);
+let lightSensor2 = buildings.buildLightMarker(new THREE.Vector3(-10, 0, 18), scene);
+
+// Render the scene.
 const renderer = new THREE.WebGLRenderer();
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Selection variables
+// Selection variables.
 let selectedObject = null;
 let selectedPlanePoint = null;
 let currentPointMarker = null;
 
-// Create the sun
+// Create the sun.
 const mySun = new sun.Sun(false, scene, renderer, camera);
 
-// Animate the sun
+// Animate the sun.
 mySun.animateOrbit();
 
 const shadowVar = new shadowVariation.ShadowVariation(park, mySun, scene);
@@ -73,12 +77,12 @@ const obj = {
     scale: "'Z''X''R''F''C''V'",
     delete: "'DELETE''BACKSPACE'",
     insert: "'ENTER'",
-    
+
     deleteBuilding: deleteBuilding,
     insertBuilding: insertBuilding,
     calculateShadow: shadowTest,
     deleteHeatmap: deleteHeatmap
-    
+
 };
 const editFolder = gui.addFolder('Edit selected building');
 
@@ -87,8 +91,6 @@ gui.add(mySun, 'isCycling').onChange(value => {
 });
 gui.add(obj, "calculateShadow");
 gui.add(obj, "deleteHeatmap");
-
-
 
 editFolder.add(obj, 'deleteBuilding');
 editFolder.close();
@@ -120,6 +122,7 @@ function deleteHeatmap() {
 
 // Raycaster for mouse to world position.
 const raycaster = new THREE.Raycaster();
+
 // Mouse position
 const mouse = new THREE.Vector2();
 
@@ -136,10 +139,10 @@ function insertBuilding() {
  */
 function onMouseMove(event) {
 
-	// calculate pointer position in normalized device coordinates
-	// (-1 to +1) for both components
-	mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-	mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+    // calculate pointer position in normalized device coordinates
+    // (-1 to +1) for both components
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
 }
 
@@ -174,7 +177,7 @@ function onClick() {
     } else {
         selectedObject = null;
         selectedPlanePoint = intersectObjects[0].point;
-        currentPointMarker = construction.buildPointMarker(selectedPlanePoint, scene);
+        currentPointMarker = buildings.buildPointMarker(selectedPlanePoint, scene);
     }
 }
 
@@ -192,7 +195,7 @@ function resetMaterials() {
             } else {
                 selectableList[i].material.color.set(landmarkColor);
             }
-            
+
             //scene.children[i].material.transparent = false;
         }
     }
@@ -203,14 +206,14 @@ function resetMaterials() {
  */
 function hoverObject() {
     // update the picking ray with the camera and pointer position
-	raycaster.setFromCamera(mouse, camera);
+    raycaster.setFromCamera(mouse, camera);
 
-	// calculate objects intersecting the picking ray
-	const intersectObjects = raycaster.intersectObjects(selectableList);
+    // calculate objects intersecting the picking ray
+    const intersectObjects = raycaster.intersectObjects(selectableList);
     if (intersectObjects.length > 0) {
         if (intersectObjects[0].object.geometry.type != 'PlaneGeometry' && intersectObjects[0].object != selectedObject
-        && intersectObjects[0].object.geometry.type != 'SphereGeometry') {
-	        intersectObjects[0].object.material.color.set(hoverColor);
+            && intersectObjects[0].object.geometry.type != 'SphereGeometry') {
+            intersectObjects[0].object.material.color.set(hoverColor);
         }
         //intersects[0].object.material.transparent = true;
         //intersects[0].object.material.opacity = 0.5;
@@ -234,7 +237,7 @@ window.addEventListener("keydown", onDocumentKeyDown, false);
 
 /**
  * Keyboard bindings.
- * @param {*} event 
+ * @param {*} event
  */
 function onDocumentKeyDown(event) {
     let keyCode = event.which;
@@ -242,7 +245,7 @@ function onDocumentKeyDown(event) {
         console.log("No object or point selected.");
     } else if (selectedPlanePoint != null && selectedObject != null) {
         console.log("Something went wrong, selectedPlanePoint and selectedObject were both " +
-        "not null at the same time, which should not happen.");
+            "not null at the same time, which should not happen.");
     } else if (selectedPlanePoint != null) {
 
         keyCommands.pointSelectedKeyEvents(keyCode, selectedObject, selectedPlanePoint, scene, selectableList);
@@ -251,15 +254,22 @@ function onDocumentKeyDown(event) {
 
         keyCommands.objectSelectedKeyEvents(keyCode, selectedObject, selectedPlanePoint, scene, currentPointMarker, selectableList);
 
-    } 
+    }
 }
+
+// Calculates and sets the initial color of the light sensors
+calculateLightSensor(lightSensor1, mySun.sun);
+calculateLightSensor(lightSensor2, mySun.sun);
+
 
 function animate() {
     resetMaterials();
     hoverObject();
     window.requestAnimationFrame(animate);
+    calculateLightSensor(lightSensor1, mySun.sun);
+    calculateLightSensor(lightSensor2, mySun.sun);
     renderer.render(scene, camera);
-
 }
+
 animate();
 

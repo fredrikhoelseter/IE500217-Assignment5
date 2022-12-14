@@ -1,7 +1,6 @@
-//Sun
 import * as light from "./lighting.js";
 
-// Represents a sun
+// Represents a sun.
 export class Sun {
     constructor(isCycling, scene, renderer, camera) {
         this.isCycling = isCycling;
@@ -14,7 +13,7 @@ export class Sun {
         this.addSunToScene();
     }
 
-    // Makes a sun mesh
+    // Creates a sun mesh.
     createSun(){
         const sunGeo = new THREE.SphereBufferGeometry(2, 12, 8);
         const sunMaterial = new THREE.MeshBasicMaterial({color: 0xFFB52E})
@@ -25,7 +24,7 @@ export class Sun {
         return sunMesh;
     }
 
-    // Animates the sun going in orbit
+    // Animates the sun going in orbit.
     animateOrbit(){
         if (!this.isCycling) {
             this.setPosition();
@@ -37,13 +36,12 @@ export class Sun {
         const time = sunOrbitSpeed * performance.now();
         const t = (time % loopTime) / loopTime;
 
-        let p = this.curve.getPoint(t);
-        console.log(p);
+        let point = this.curve.getPoint(t);
 
-        this.sun.position.x = p.x;
-        this.sun.position.y = p.y;
-        this.sunLight.position.x = p.x;
-        this.sunLight.position.y = p.y;
+        this.sun.position.x = point.x;
+        this.sun.position.y = point.y;
+        this.sunLight.position.x = point.x;
+        this.sunLight.position.y = point.y;
 
         requestAnimationFrame(() => this.animateOrbit());
         this.renderer.render(this.scene, this.camera);
@@ -66,10 +64,10 @@ export class Sun {
 
     // Sets the default position of the sun.
     setPosition() {
-        let p = this.curve.getPoint(0.4);
-        this.sun.position.x = p.x;
-        this.sun.position.y = p.y;
-        this.sunLight.position.x = p.x;
-        this.sunLight.position.y = p.y;
+        let point = this.curve.getPoint(0.4);
+        this.sun.position.x = point.x;
+        this.sun.position.y = point.y;
+        this.sunLight.position.x = point.x;
+        this.sunLight.position.y = point.y;
     }
 }
