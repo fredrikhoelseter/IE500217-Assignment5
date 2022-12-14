@@ -1,5 +1,6 @@
 import * as buildings from './buildings.js';
 
+// Deletes an object from the scene, and removes it from the selectable list.
 export function deleteObject(object, scene, selectableList) {
     if (object != null) {
         selectableList.splice(selectableList.indexOf(object), 1);
@@ -11,6 +12,8 @@ export function deleteObject(object, scene, selectableList) {
     }
 }
 
+// Adds an object to the scene at the pointOnPlane position.
+// Adds the object to the selectableList.
 export function insertObjectOnPlane(pointOnPlane, scene, pointMarker, selectableList) {
     if (pointOnPlane != null) {
         buildings.buildCube(pointOnPlane, new THREE.Vector3(1.5, 3, 1.5), scene, selectableList);
@@ -23,6 +26,8 @@ export function insertObjectOnPlane(pointOnPlane, scene, pointMarker, selectable
     }
 }
 
+// Scales the object along y-axis. Adjusts the objects position,
+// so the bottom vertices dont change position.
 export function scaleObjectY(object, scaleStep, isPositive) {
     let scale = -scaleStep;
     if (isPositive) {

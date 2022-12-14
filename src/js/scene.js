@@ -220,8 +220,6 @@ function hoverObject() {
             && intersectObjects[0].object.geometry.type != 'SphereGeometry') {
             intersectObjects[0].object.material.color.set(hoverColor);
         }
-        //intersects[0].object.material.transparent = true;
-        //intersects[0].object.material.opacity = 0.5;
     }
 }
 
