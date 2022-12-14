@@ -1,12 +1,16 @@
 import * as buildings from "./buildings.js";
  
-
+/**
+ * Takes a plane object, sun object and a scene,
+ * and can use these to calculate the shadow on the plane,
+ * and create a heatmap overlay, based on the shadow variation
+ * over the course of a day.
+ */
 export class ShadowVariation {
-    constructor(plane, sun, scene, selectableList) {
+    constructor(plane, sun, scene) {
         this.plane = plane;
         this.sun = sun;
         this.scene = scene;
-        this.selectableList = selectableList;
         
         this.samplesX = 32;
         this.samplesY = 60;
@@ -15,6 +19,7 @@ export class ShadowVariation {
         this.planePoints = [];
     }
 
+    // Calculates, and creates the heatmap.
     createHeatMap() {
         this.deleteHeatMap();
         this.scene.remove(this.sun.sun)
@@ -41,6 +46,11 @@ export class ShadowVariation {
         return this.planeSamples;
     }
 
+    /**
+     * Calculates the shadow for all the points on a plane.
+     * @param {*} createHeatMap A boolean, set to true to create the heatmap. Set to false if just calculating.
+     * @param {*} sunAt A number, where the sun is at its curve.
+     */
     calculateFrameShadow(createHeatMap, sunAt) {
         const curvePoint = this.sun.curve.getPoint(sunAt);
         const sunPosition = new THREE.Vector3(curvePoint.x, curvePoint.y, 0);

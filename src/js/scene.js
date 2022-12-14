@@ -80,26 +80,31 @@ const obj = {
 
     deleteBuilding: deleteBuilding,
     insertBuilding: insertBuilding,
-    calculateShadow: shadowTest,
+    calculateHeatmap: shadowTest,
     deleteHeatmap: deleteHeatmap
 
 };
-const editFolder = gui.addFolder('Edit selected building');
-
-gui.add(mySun, 'isCycling').onChange(value => {
-    mySun.animateOrbit();
-});
-gui.add(obj, "calculateShadow");
-gui.add(obj, "deleteHeatmap");
-
-editFolder.add(obj, 'deleteBuilding');
-editFolder.close();
-
-const insertFolder = gui.addFolder('Insert new building');
-insertFolder.add(obj, 'insertBuilding');
-insertFolder.close();
 
 const keyFolder = gui.addFolder('Key Bindings');
+const buildingFolder = gui.addFolder('Buildings');
+const shadowFolder = gui.addFolder("Shadow Variation");
+const sunFolder = gui.addFolder('Sun');
+
+sunFolder.add(mySun, 'isCycling').onChange(value => {
+    mySun.animateOrbit();
+});
+sunFolder.close();
+
+shadowFolder.add(obj, "calculateHeatmap");
+shadowFolder.add(obj, "deleteHeatmap");
+shadowFolder.close();
+
+buildingFolder.add(obj, 'deleteBuilding');
+buildingFolder.add(obj, 'insertBuilding');
+buildingFolder.close();
+
+
+
 keyFolder.add(obj, 'translate');
 keyFolder.add(obj, 'rotate');
 keyFolder.add(obj, 'scale');
